@@ -2,7 +2,7 @@
   "name": "subnet-zero",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://aabbhishek.github.io/subnet-zero",
+  "homepage": "https://aabbhishek.github.io/SubnetZero",
   "description": "Cloud-Native Subnet Calculator with AWS, Azure, GCP awareness. VPC planning, Terraform export, IPv4/IPv6 support.",
   "author": "Subnet Zero",
   "license": "MIT",
