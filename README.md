@@ -1,6 +1,8 @@
-# Subnet Zero 🌐
-
 <div align="center">
+
+<img src="./public/subnet-zero.png" alt="Subnet Zero Logo" width="120" height="120" />
+
+# Subnet Zero
 
 **Cloud-Native Subnet Calculator for Network Engineers & DevOps Teams**
 
@@ -196,7 +198,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**[⬆ Back to Top](#subnet-zero-)**
+**[⬆ Back to Top](#subnet-zero)**
 
 Made with ❤️ for the DevOps community
 
