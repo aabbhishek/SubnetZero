@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Live Demo](https://yourusername.github.io/subnet-zero) · [Report Bug](https://github.com/yourusername/subnet-zero/issues) · [Request Feature](https://github.com/yourusername/subnet-zero/issues)
+[Live Demo](https://aabbhishek.github.io/SubnetZero) · [Report Bug](https://github.com/aabbhishek/SubnetZero/issues) · [Request Feature](https://github.com/aabbhishek/SubnetZero/issues)
 
 </div>
 
@@ -74,8 +74,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/subnet-zero.git
-cd subnet-zero
+git clone https://github.com/aabbhishek/SubnetZero.git
+cd SubnetZero
 
 # Install dependencies
 npm install
@@ -94,7 +94,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 1. Update `homepage` in `package.json`:
    ```json
-   "homepage": "https://yourusername.github.io/subnet-zero"
+   "homepage": "https://aabbhishek.github.io/SubnetZero"
    ```
 
 2. Deploy:
