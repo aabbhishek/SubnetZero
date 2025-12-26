@@ -196,7 +196,7 @@ const Header = ({ onMenuClick, showMenuButton = false }) => {
           
           {/* GitHub Link */}
           <a
-            href="https://github.com"
+            href="https://github.com/aabbhishek/SubnetZero"
             target="_blank"
             rel="noopener noreferrer"
             style={{
