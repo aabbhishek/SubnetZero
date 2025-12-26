@@ -1,0 +1,23 @@
+{
+  "short_name": "Subnet Zero",
+  "name": "Subnet Zero - Cloud-Native Subnet Calculator",
+  "description": "Calculate subnets with AWS, Azure, GCP reserved IP awareness. Visual VPC planning, IaC export, and more.",
+  "icons": [
+    {
+      "src": "subnet-zero.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "subnet-zero.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#050510",
+  "background_color": "#050510",
+  "categories": ["developer", "productivity", "utilities"]
+}
