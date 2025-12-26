@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/SubnetZero/static/css/main.bc9e5ae6.css",
-    "main.js": "/SubnetZero/static/js/main.270afc46.js",
+    "main.js": "/SubnetZero/static/js/main.4c8b400a.js",
     "index.html": "/SubnetZero/index.html",
     "main.bc9e5ae6.css.map": "/SubnetZero/static/css/main.bc9e5ae6.css.map",
-    "main.270afc46.js.map": "/SubnetZero/static/js/main.270afc46.js.map"
+    "main.4c8b400a.js.map": "/SubnetZero/static/js/main.4c8b400a.js.map"
   },
   "entrypoints": [
     "static/css/main.bc9e5ae6.css",
-    "static/js/main.270afc46.js"
+    "static/js/main.4c8b400a.js"
   ]
 }
