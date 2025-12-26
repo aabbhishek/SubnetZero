@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import custom styles after Tailwind */
+@import './styles/variables.css';
+@import './styles/glassmorphism.css';
+@import './styles/animations.css';

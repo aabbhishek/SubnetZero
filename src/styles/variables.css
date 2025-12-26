@@ -1,0 +1,185 @@
+/* ============================================
+   SUBNET ZERO - Design System Variables
+   Glassmorphic Dark Theme
+   ============================================ */
+
+:root {
+  /* ─────────────────────────────────────────
+     COLOR PALETTE
+     ───────────────────────────────────────── */
+  
+  /* Background Gradient */
+  --bg-primary: #050510;
+  --bg-secondary: #0a0a1a;
+  --bg-tertiary: #12122a;
+  
+  /* Glass Surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-bg-hover: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.15);
+  
+  /* Cloud Provider Colors */
+  --aws-primary: #ff9900;
+  --aws-secondary: #232f3e;
+  --azure-primary: #0078d4;
+  --azure-secondary: #00bcf2;
+  --gcp-blue: #4285f4;
+  --gcp-red: #ea4335;
+  --gcp-yellow: #fbbc05;
+  --gcp-green: #34a853;
+  
+  /* Accent Colors */
+  --accent-primary: #00d4ff;
+  --accent-secondary: #7c3aed;
+  --accent-tertiary: #f472b6;
+  
+  /* Semantic Colors */
+  --success: #10b981;
+  --success-muted: rgba(16, 185, 129, 0.15);
+  --warning: #f59e0b;
+  --warning-muted: rgba(245, 158, 11, 0.15);
+  --error: #ef4444;
+  --error-muted: rgba(239, 68, 68, 0.15);
+  --info: #3b82f6;
+  --info-muted: rgba(59, 130, 246, 0.15);
+  
+  /* Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-muted: #475569;
+  
+  /* IP/Network Specific */
+  --ip-network: #f472b6;
+  --ip-reserved: #fbbf24;
+  --ip-usable: #34d399;
+  --ip-broadcast: #f87171;
+  
+  /* ─────────────────────────────────────────
+     TYPOGRAPHY
+     ───────────────────────────────────────── */
+  
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  
+  /* Font Weights */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* ─────────────────────────────────────────
+     SPACING
+     ───────────────────────────────────────── */
+  
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  
+  /* ─────────────────────────────────────────
+     BORDERS & RADIUS
+     ───────────────────────────────────────── */
+  
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* ─────────────────────────────────────────
+     SHADOWS & EFFECTS
+     ───────────────────────────────────────── */
+  
+  --shadow-glow-sm: 0 0 20px rgba(0, 212, 255, 0.15);
+  --shadow-glow-md: 0 0 40px rgba(0, 212, 255, 0.2);
+  --shadow-glow-lg: 0 0 60px rgba(0, 212, 255, 0.25);
+  
+  --shadow-glass: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  
+  --shadow-elevated: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  
+  /* Blur */
+  --blur-glass: 20px;
+  --blur-heavy: 40px;
+  
+  /* ─────────────────────────────────────────
+     TRANSITIONS
+     ───────────────────────────────────────── */
+  
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* ─────────────────────────────────────────
+     Z-INDEX LAYERS
+     ───────────────────────────────────────── */
+  
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-tooltip: 400;
+  --z-toast: 500;
+  
+  /* ─────────────────────────────────────────
+     LAYOUT
+     ───────────────────────────────────────── */
+  
+  --sidebar-width: 280px;
+  --header-height: 72px;
+  --max-content-width: 1400px;
+}
+
+/* Provider Theme Overrides */
+[data-provider="aws"] {
+  --provider-primary: var(--aws-primary);
+  --provider-secondary: var(--aws-secondary);
+  --provider-glow: rgba(255, 153, 0, 0.3);
+}
+
+[data-provider="azure"] {
+  --provider-primary: var(--azure-primary);
+  --provider-secondary: var(--azure-secondary);
+  --provider-glow: rgba(0, 120, 212, 0.3);
+}
+
+[data-provider="gcp"] {
+  --provider-primary: var(--gcp-blue);
+  --provider-secondary: var(--gcp-green);
+  --provider-glow: rgba(66, 133, 244, 0.3);
+}
+

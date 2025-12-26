@@ -1,0 +1,76 @@
+{
+  "name": "subnet-zero",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://yourusername.github.io/subnet-zero",
+  "description": "Cloud-Native Subnet Calculator with AWS, Azure, GCP awareness. VPC planning, Terraform export, IPv4/IPv6 support.",
+  "author": "Subnet Zero",
+  "license": "MIT",
+  "dependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^13.5.0",
+    "framer-motion": "^11.18.2",
+    "lucide-react": "^0.562.0",
+    "lz-string": "^1.5.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "globals": {
+      "BigInt": "readonly"
+    },
+    "env": {
+      "es2020": true
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "keywords": [
+    "subnet",
+    "calculator",
+    "CIDR",
+    "VPC",
+    "AWS",
+    "Azure",
+    "GCP",
+    "cloud",
+    "networking",
+    "IPv4",
+    "IPv6",
+    "Terraform",
+    "CloudFormation",
+    "DevOps"
+  ]
+}
