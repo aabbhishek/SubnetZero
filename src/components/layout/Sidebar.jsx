@@ -97,13 +97,14 @@ const Sidebar = ({
               background: activeModule === module.id
                 ? 'linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(168, 85, 247, 0.1))'
                 : 'transparent',
-              borderLeft: activeModule === module.id 
-                ? '2px solid #22d3ee' 
-                : '2px solid transparent',
+              borderTop: 'none',
+              borderRight: 'none',
+              borderBottom: 'none',
+              borderLeftWidth: '2px',
+              borderLeftStyle: 'solid',
+              borderLeftColor: activeModule === module.id ? '#22d3ee' : 'transparent',
               opacity: !module.available ? 0.5 : 1,
-              cursor: !module.available ? 'not-allowed' : 'pointer',
-              border: 'none',
-              borderLeftStyle: 'solid'
+              cursor: !module.available ? 'not-allowed' : 'pointer'
             }}
           >
             <span style={{ 

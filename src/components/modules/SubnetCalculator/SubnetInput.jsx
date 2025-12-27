@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { isValidCIDR, parseCIDR, getNetworkAddress } from '../../../utils/ipv4';
 import { isValidIPv6CIDR, parseIPv6CIDR } from '../../../utils/ipv6';
@@ -18,96 +18,28 @@ const SubnetInput = ({
   const [error, setError] = useState('');
   const [isValid, setIsValid] = useState(false);
   const isUserTyping = useRef(false);
+  const prevValueRef = useRef(value);
+  
+  // Use refs to avoid stale closures and infinite loops
+  const onChangeRef = useRef(onChange);
+  const onValidChangeRef = useRef(onValidChange);
+  
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onValidChangeRef.current = onValidChange;
+  });
   
   const defaultPlaceholder = ipVersion === 'ipv4' 
     ? '10.0.0.0/16' 
     : '2600:1f18::/56';
-  
-  // Only sync from parent when it's an external change (URL load, IP version change)
-  // Don't sync when user is actively typing
-  useEffect(() => {
-    if (!isUserTyping.current) {
-      setInputValue(value);
-    }
-  }, [value]);
-  
-  // Reset when IP version changes
-  useEffect(() => {
-    setInputValue('');
-    setError('');
-    setIsValid(false);
-  }, [ipVersion]);
-  
-  const validateAndUpdate = (newValue, fromPreset = false) => {
-    // Mark as user typing unless it's from a preset
-    if (!fromPreset) {
-      isUserTyping.current = true;
-    }
-    
-    setInputValue(newValue);
-    
-    if (!newValue.trim()) {
-      setError('');
-      setIsValid(false);
-      onChange?.(newValue);
-      onValidChange?.(null);
-      isUserTyping.current = false;
-      return;
-    }
-    
-    try {
-      let parsed;
-      let valid;
-      
-      if (ipVersion === 'ipv4') {
-        valid = isValidCIDR(newValue);
-        if (valid) {
-          parsed = parseCIDR(newValue);
-          // Calculate network address for the parent (used in calculations)
-          const networkAddr = getNetworkAddress(parsed.ip, parsed.prefix);
-          const normalized = `${networkAddr}/${parsed.prefix}`;
-          
-          setError('');
-          setIsValid(true);
-          // Send normalized to parent for calculations, but keep user's input displayed
-          onChange?.(normalized);
-          onValidChange?.({ ...parsed, cidr: normalized, userInput: newValue });
-          
-          // Reset typing flag after a short delay to allow state to settle
-          setTimeout(() => { isUserTyping.current = false; }, 100);
-        } else {
-          throw new Error('Invalid IPv4 CIDR notation');
-        }
-      } else {
-        valid = isValidIPv6CIDR(newValue);
-        if (valid) {
-          parsed = parseIPv6CIDR(newValue);
-          
-          setError('');
-          setIsValid(true);
-          onChange?.(newValue);
-          onValidChange?.(parsed);
-          
-          setTimeout(() => { isUserTyping.current = false; }, 100);
-        } else {
-          throw new Error('Invalid IPv6 CIDR notation');
-        }
-      }
-    } catch (err) {
-      setError(getErrorMessage(newValue, ipVersion));
-      setIsValid(false);
-      onChange?.(newValue);
-      onValidChange?.(null);
-      isUserTyping.current = false;
-    }
-  };
-  
-  const getErrorMessage = (value, version) => {
+
+  // Helper to get error message
+  const getErrorMessage = useCallback((val, version) => {
     if (version === 'ipv4') {
-      if (!value.includes('/')) {
+      if (!val.includes('/')) {
         return 'Missing prefix (e.g., /24)';
       }
-      const [ip, prefix] = value.split('/');
+      const [ip, prefix] = val.split('/');
       const octets = ip.split('.');
       if (octets.length !== 4) {
         return 'IPv4 requires 4 octets';
@@ -125,16 +57,106 @@ const SubnetInput = ({
       }
       return 'Invalid CIDR format';
     } else {
-      if (!value.includes('/')) {
+      if (!val.includes('/')) {
         return 'Missing prefix (e.g., /64)';
       }
-      const [, prefix] = value.split('/');
+      const [, prefix] = val.split('/');
       const prefixNum = parseInt(prefix, 10);
       if (isNaN(prefixNum) || prefixNum < 0 || prefixNum > 128) {
         return 'Prefix must be 0-128';
       }
       return 'Invalid IPv6 CIDR format';
     }
+  }, []);
+
+  // Validate and trigger callbacks
+  const performValidation = useCallback((newValue, triggerOnChange = true) => {
+    if (!newValue || !newValue.trim()) {
+      setError('');
+      setIsValid(false);
+      if (triggerOnChange) onChangeRef.current?.('');
+      onValidChangeRef.current?.(null);
+      return;
+    }
+    
+    try {
+      let parsed;
+      let valid;
+      
+      if (ipVersion === 'ipv4') {
+        valid = isValidCIDR(newValue);
+        if (valid) {
+          parsed = parseCIDR(newValue);
+          const networkAddr = getNetworkAddress(parsed.ip, parsed.prefix);
+          const normalized = `${networkAddr}/${parsed.prefix}`;
+          
+          setError('');
+          setIsValid(true);
+          if (triggerOnChange) onChangeRef.current?.(normalized);
+          onValidChangeRef.current?.({ ...parsed, cidr: normalized, userInput: newValue });
+        } else {
+          throw new Error('Invalid');
+        }
+      } else {
+        valid = isValidIPv6CIDR(newValue);
+        if (valid) {
+          parsed = parseIPv6CIDR(newValue);
+          setError('');
+          setIsValid(true);
+          if (triggerOnChange) onChangeRef.current?.(newValue);
+          onValidChangeRef.current?.(parsed);
+        } else {
+          throw new Error('Invalid');
+        }
+      }
+    } catch (err) {
+      setError(getErrorMessage(newValue, ipVersion));
+      setIsValid(false);
+      if (triggerOnChange) onChangeRef.current?.(newValue);
+      onValidChangeRef.current?.(null);
+    }
+  }, [ipVersion, getErrorMessage]);
+  
+  // Sync from parent when it's an external change (URL load, example applied)
+  useEffect(() => {
+    // Only respond to external changes (not from user typing)
+    if (!isUserTyping.current && value !== prevValueRef.current) {
+      prevValueRef.current = value;
+      setInputValue(value);
+      
+      // Validate the new external value
+      if (value && value.trim()) {
+        performValidation(value, false); // false = don't call onChange again
+      } else {
+        setError('');
+        setIsValid(false);
+        onValidChangeRef.current?.(null);
+      }
+    }
+  }, [value, performValidation]);
+  
+  // Reset when IP version changes
+  useEffect(() => {
+    setInputValue('');
+    setError('');
+    setIsValid(false);
+    prevValueRef.current = '';
+  }, [ipVersion]);
+
+  const validateAndUpdate = (newValue, fromPreset = false) => {
+    // Mark as user typing unless it's from a preset
+    if (!fromPreset) {
+      isUserTyping.current = true;
+    }
+    
+    setInputValue(newValue);
+    prevValueRef.current = newValue;
+    
+    // Perform validation (this will call onChange and onValidChange)
+    performValidation(newValue, true);
+    
+    // Reset typing flag after a short delay
+    setTimeout(() => { isUserTyping.current = false; }, 100);
   };
   
   // Common CIDR presets

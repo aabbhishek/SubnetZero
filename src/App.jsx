@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Header, Sidebar, Background } from './components/layout';
+import React, { useState, useEffect } from 'react';
+import { Header, Sidebar, Background, IntroTour, LoadingScreen } from './components/layout';
 import SubnetCalculator from './components/modules/SubnetCalculator';
 import VPCPlanner from './components/modules/VPCPlanner';
 import DHCPBuilder from './components/modules/DHCPBuilder';
@@ -13,6 +13,28 @@ import './App.css';
 function App() {
   const [activeModule, setActiveModule] = useState('subnet-calculator');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
+
+  // Check if user has seen the intro before
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem('subnetZero_introCompleted');
+    if (!hasSeenIntro) {
+      setShowIntro(true);
+    }
+  }, []);
+
+  const handleLoadComplete = () => {
+    setIsLoading(false);
+  };
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
+
+  const handleIntroSkip = () => {
+    setShowIntro(false);
+  };
   
   const renderModule = () => {
     switch (activeModule) {
@@ -26,9 +48,22 @@ function App() {
         return <SubnetCalculator />;
     }
   };
+
+  // Show loading screen first
+  if (isLoading) {
+    return <LoadingScreen onLoadComplete={handleLoadComplete} minDisplayTime={2500} />;
+  }
   
   return (
     <div className="app">
+      {/* Intro Tour - shows for first-time users */}
+      {showIntro && (
+        <IntroTour 
+          onComplete={handleIntroComplete}
+          onSkip={handleIntroSkip}
+        />
+      )}
+
       {/* Animated Background */}
       <Background />
       

@@ -28,6 +28,21 @@ const Option121Builder = ({ value, onChange, devMode }) => {
   const [editForm, setEditForm] = useState({ destination: '', prefix: 24, gateway: '' });
   const [nextId, setNextId] = useState(2);
 
+  // Sync with external value (e.g., from examples)
+  useEffect(() => {
+    if (value && Array.isArray(value) && value.length > 0) {
+      // Check if it's a new set of routes (not from our own onChange)
+      const newRoutes = value.map((r, i) => ({
+        id: r.id || Date.now() + i,
+        destination: r.destination?.split('/')[0] || r.destination || '',
+        prefix: r.prefix ?? (r.destination?.includes('/') ? parseInt(r.destination.split('/')[1], 10) : 24),
+        gateway: r.gateway || ''
+      }));
+      setRoutes(newRoutes);
+      setNextId(Math.max(...newRoutes.map(r => r.id)) + 1);
+    }
+  }, [value]);
+
   // Calculate encoded output
   const encodedBytes = encodeOption121(routes.filter(r => 
     isValidIP(r.destination) && isValidIP(r.gateway) && r.prefix >= 0 && r.prefix <= 32

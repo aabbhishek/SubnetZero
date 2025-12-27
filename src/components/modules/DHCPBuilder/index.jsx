@@ -11,10 +11,152 @@ import {
   Zap
 } from 'lucide-react';
 import GlassCard from '../../common/GlassCard';
+import { UsageExamples } from '../../common';
 import Option43Builder from './Option43Builder';
 import StandardOptionsBuilder from './StandardOptionsBuilder';
 import Option121Builder from './Option121Builder';
 import DHCPExport from './DHCPExport';
+
+// DHCP Builder usage examples
+const dhcpExamples = [
+  {
+    id: 'cisco-ap',
+    title: 'Cisco AP Provisioning (Option 43)',
+    category: 'Wireless',
+    icon: '📡',
+    iconBg: 'rgba(0, 159, 219, 0.15)',
+    iconColor: '#009fdb',
+    description: 'Configure Option 43 to point Cisco lightweight APs to your Wireless LAN Controller.',
+    sampleInput: `Type: 0xF1 (Cisco specific)
+Value: 192.168.1.100 (WLC IP)`,
+    expectedOutput: `Hex: F1:04:C0:A8:01:64
+Breakdown:
+  F1 = Cisco WLC option type
+  04 = Length (4 bytes for IPv4)
+  C0:A8:01:64 = 192.168.1.100`,
+    steps: [
+      'Go to Option 43 tab',
+      'Select "Cisco Wireless" template',
+      'Enter WLC IP: 192.168.1.100',
+      'Export as ISC DHCP or Windows Server format'
+    ],
+    applyData: {
+      tab: 'option43'
+    }
+  },
+  {
+    id: 'static-routes',
+    title: 'Classless Static Routes (Option 121)',
+    category: 'Routing',
+    icon: '🔀',
+    iconBg: 'rgba(34, 197, 94, 0.15)',
+    iconColor: '#22c55e',
+    description: 'Push static routes to clients without modifying their default gateway.',
+    sampleInput: `Destination: 10.10.0.0/16
+Gateway: 192.168.1.1`,
+    expectedOutput: `Encoded: 10:0A:0A:C0:A8:01:01
+Breakdown:
+  10 = /16 prefix
+  0A:0A = 10.10 (network portion)
+  C0:A8:01:01 = 192.168.1.1 (gateway)`,
+    steps: [
+      'Go to Option 121 tab',
+      'Add route: Destination 10.10.0.0/16',
+      'Set Gateway: 192.168.1.1',
+      'Add multiple routes as needed'
+    ],
+    applyData: {
+      tab: 'option121',
+      routes: [
+        { destination: '10.10.0.0/16', gateway: '192.168.1.1' }
+      ]
+    }
+  },
+  {
+    id: 'basic-dhcp',
+    title: 'Basic DHCP Scope',
+    category: 'Standard',
+    icon: '🖥️',
+    iconBg: 'rgba(34, 211, 238, 0.15)',
+    iconColor: '#22d3ee',
+    description: 'Configure essential DHCP options for a typical office network.',
+    sampleInput: `Gateway: 192.168.1.1
+DNS: 8.8.8.8, 8.8.4.4
+Domain: office.local
+Lease: 8 hours`,
+    expectedOutput: `Option 3: 192.168.1.1 (Gateway)
+Option 6: 8.8.8.8, 8.8.4.4 (DNS)
+Option 15: office.local (Domain)
+Option 51: 28800 (Lease time)`,
+    steps: [
+      'Go to Standard Options tab',
+      'Enter Default Gateway',
+      'Add primary and secondary DNS servers',
+      'Set domain name and lease time'
+    ],
+    applyData: {
+      tab: 'standard',
+      options: {
+        gateway: '192.168.1.1',
+        dnsServers: ['8.8.8.8', '8.8.4.4'],
+        domainName: 'office.local',
+        leaseTime: 28800
+      }
+    }
+  },
+  {
+    id: 'pxe-boot',
+    title: 'PXE Network Boot',
+    category: 'Provisioning',
+    icon: '💿',
+    iconBg: 'rgba(168, 85, 247, 0.15)',
+    iconColor: '#a855f7',
+    description: 'Enable network boot (PXE) for OS deployment and diskless workstations.',
+    sampleInput: `Next Server: 192.168.1.50
+Boot File: pxelinux.0`,
+    expectedOutput: `Option 66: 192.168.1.50 (TFTP Server)
+Option 67: pxelinux.0 (Boot file)
+Enables PXE boot for clients`,
+    steps: [
+      'Go to Standard Options tab',
+      'Enable "Network Boot (PXE)" toggle',
+      'Enter TFTP server IP (next-server)',
+      'Specify boot filename'
+    ],
+    applyData: {
+      tab: 'standard',
+      options: {
+        gateway: '192.168.1.1',
+        pxeEnabled: true,
+        nextServer: '192.168.1.50',
+        bootFile: 'pxelinux.0'
+      }
+    }
+  },
+  {
+    id: 'avaya-phones',
+    title: 'Avaya IP Phone Setup',
+    category: 'VoIP',
+    icon: '☎️',
+    iconBg: 'rgba(239, 68, 68, 0.15)',
+    iconColor: '#ef4444',
+    description: 'Configure Option 43 for Avaya IP phones to auto-provision from call manager.',
+    sampleInput: `Type: 0x02 (Avaya)
+Value: http://cm.example.com/config`,
+    expectedOutput: `Option 43 TLV for Avaya:
+  02:xx:http://cm.example.com/config
+Phone auto-discovers provisioning server`,
+    steps: [
+      'Go to Option 43 tab',
+      'Select "Custom" or add Avaya template',
+      'Enter call manager URL/IP',
+      'Configure on your DHCP server'
+    ],
+    applyData: {
+      tab: 'option43'
+    }
+  }
+];
 
 const tabs = [
   { id: 'standard', name: 'Standard Options', icon: Network, description: 'Essential DHCP options' },
@@ -44,12 +186,36 @@ const DHCPBuilder = () => {
     setStandardOptions(options);
   }, []);
 
+  // Handle applying an example
+  const handleApplyExample = useCallback((data) => {
+    // Switch to the appropriate tab
+    if (data.tab) {
+      setActiveTab(data.tab);
+    }
+    
+    // Apply standard options if provided
+    if (data.options) {
+      setStandardOptions(prev => ({ ...prev, ...data.options }));
+    }
+    
+    // Apply routes if provided
+    if (data.routes) {
+      setOption121Routes(data.routes.map((r, i) => ({ ...r, id: Date.now() + i })));
+    }
+  }, []);
+
   return (
     <div style={{ 
       padding: '24px',
       maxWidth: '1200px',
       margin: '0 auto'
     }}>
+      {/* Usage Examples */}
+      <UsageExamples 
+        examples={dhcpExamples} 
+        onApplyExample={handleApplyExample}
+      />
+
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <div style={{ 
@@ -147,13 +313,16 @@ const DHCPBuilder = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '8px', 
-        marginBottom: '24px',
-        overflowX: 'auto',
-        paddingBottom: '4px'
-      }}>
+      <div 
+        data-tour="dhcp-tabs"
+        style={{ 
+          display: 'flex', 
+          gap: '8px', 
+          marginBottom: '24px',
+          overflowX: 'auto',
+          paddingBottom: '4px'
+        }}
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -231,7 +400,7 @@ const DHCPBuilder = () => {
       </motion.div>
 
       {/* Quick Summary Card */}
-      <GlassCard className="p-6" style={{ marginTop: '24px' }}>
+      <GlassCard className="p-6" style={{ marginTop: '24px' }} data-tour="dhcp-summary">
         <h3 style={{ 
           fontSize: '16px', 
           fontWeight: '600', 

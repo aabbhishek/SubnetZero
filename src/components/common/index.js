@@ -8,4 +8,5 @@ export { default as Tooltip } from './Tooltip';
 export { default as Badge } from './Badge';
 export { default as PrivacyBadge } from './PrivacyBadge';
 export { default as CodeBlock } from './CodeBlock';
+export { default as UsageExamples } from './UsageExamples';
 

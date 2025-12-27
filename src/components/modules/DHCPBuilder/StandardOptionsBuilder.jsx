@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Network, 
@@ -165,6 +165,26 @@ const StandardOptionsBuilder = ({ value, onChange, devMode }) => {
     ntpServers: [''],
     domainSearch: ['']
   });
+
+  // Sync with external value (e.g., from examples)
+  useEffect(() => {
+    if (value && Object.keys(value).length > 0) {
+      setOptions(prev => ({
+        ...prev,
+        ...value,
+        // Ensure arrays are properly formatted
+        dnsServers: value.dnsServers?.length > 0 ? value.dnsServers : prev.dnsServers,
+        ntpServers: value.ntpServers?.length > 0 ? value.ntpServers : prev.ntpServers,
+        domainSearch: value.domainSearch?.length > 0 ? value.domainSearch : prev.domainSearch,
+        // Map pxeEnabled to enablePxe
+        enablePxe: value.pxeEnabled ?? value.enablePxe ?? prev.enablePxe,
+        // Map nextServer to tftpServer
+        tftpServer: value.nextServer ?? value.tftpServer ?? prev.tftpServer,
+        // Map bootFile to bootFilename
+        bootFilename: value.bootFile ?? value.bootFilename ?? prev.bootFilename
+      }));
+    }
+  }, [value]);
 
   // Use useCallback to prevent recreation of handlers
   const updateOption = useCallback((key, val) => {

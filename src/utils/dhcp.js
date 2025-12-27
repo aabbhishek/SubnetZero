@@ -11,7 +11,10 @@
  * Convert IP address string to bytes array
  */
 export const ipToBytes = (ip) => {
-  return ip.split('.').map(octet => parseInt(octet, 10));
+  if (!ip || typeof ip !== 'string') return [0, 0, 0, 0];
+  const parts = ip.split('.');
+  if (parts.length !== 4) return [0, 0, 0, 0];
+  return parts.map(octet => parseInt(octet, 10) || 0);
 };
 
 /**
@@ -51,6 +54,7 @@ export const isValidIP = (ip) => {
  * Convert number to hex byte
  */
 export const toHexByte = (num) => {
+  if (num === undefined || num === null) return '00';
   return num.toString(16).padStart(2, '0');
 };
 
@@ -58,7 +62,8 @@ export const toHexByte = (num) => {
  * Convert bytes array to hex string with separator
  */
 export const bytesToHex = (bytes, separator = ':') => {
-  return bytes.map(b => toHexByte(b)).join(separator);
+  if (!bytes || !Array.isArray(bytes) || bytes.length === 0) return '';
+  return bytes.filter(b => b !== undefined && b !== null).map(b => toHexByte(b)).join(separator);
 };
 
 /**
@@ -234,6 +239,10 @@ export const VENDOR_TEMPLATES = {
  * Format: prefix-length + significant-octets + gateway
  */
 export const encodeRoute121 = (destination, prefix, gateway) => {
+  if (!destination || prefix === undefined || !gateway) {
+    return [];
+  }
+  
   const bytes = [];
   
   // Add prefix length
@@ -244,12 +253,20 @@ export const encodeRoute121 = (destination, prefix, gateway) => {
   
   // Add only the significant octets of the destination
   const destBytes = ipToBytes(destination);
+  if (!destBytes || destBytes.length !== 4) {
+    return [];
+  }
+  
   for (let i = 0; i < significantOctets; i++) {
-    bytes.push(destBytes[i]);
+    bytes.push(destBytes[i] || 0);
   }
   
   // Add full gateway
-  bytes.push(...ipToBytes(gateway));
+  const gwBytes = ipToBytes(gateway);
+  if (!gwBytes || gwBytes.length !== 4) {
+    return [];
+  }
+  bytes.push(...gwBytes);
   
   return bytes;
 };
@@ -258,9 +275,30 @@ export const encodeRoute121 = (destination, prefix, gateway) => {
  * Encode multiple routes for Option 121
  */
 export const encodeOption121 = (routes) => {
+  if (!routes || !Array.isArray(routes)) return [];
+  
   const bytes = [];
   routes.forEach(route => {
-    bytes.push(...encodeRoute121(route.destination, route.prefix, route.gateway));
+    if (!route || !route.gateway) return;
+    
+    // Handle both formats: { destination, prefix, gateway } and { destination: "x.x.x.x/y", gateway }
+    let dest = route.destination || '';
+    let prefix = route.prefix;
+    
+    // If destination contains CIDR notation, extract prefix
+    if (dest.includes('/')) {
+      const parts = dest.split('/');
+      dest = parts[0];
+      prefix = parseInt(parts[1], 10);
+    }
+    
+    if (!dest || prefix === undefined || isNaN(prefix)) return;
+    
+    try {
+      bytes.push(...encodeRoute121(dest, prefix, route.gateway));
+    } catch (e) {
+      console.warn('Failed to encode route:', route, e);
+    }
   });
   return bytes;
 };

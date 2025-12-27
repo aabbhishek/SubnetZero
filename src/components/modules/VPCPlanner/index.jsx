@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GlassCard, Button } from '../../common';
+import { GlassCard, Button, UsageExamples } from '../../common';
 import { 
   isValidCIDR, 
   parseCIDR, 
@@ -18,6 +18,157 @@ import {
 import { generateIaC } from '../../../utils/iacGenerators';
 import SubnetTree from './SubnetTree';
 import SubnetVisualizer from './SubnetVisualizer';
+
+// VPC Planner usage examples
+const vpcExamples = [
+  {
+    id: 'three-tier',
+    title: '3-Tier Architecture (AWS)',
+    category: 'Production',
+    icon: '🏗️',
+    iconBg: 'rgba(255, 153, 0, 0.15)',
+    iconColor: '#ff9900',
+    description: 'Classic web application architecture with public web tier, private app tier, and isolated database tier across 2 AZs.',
+    steps: [
+      'Set VPC CIDR to 10.0.0.0/16',
+      'Click "3-Tier 2-AZ" quick pattern',
+      'Creates 6 subnets: public-az1/az2, private-az1/az2, database-az1/az2',
+      'Each subnet gets a /24 block (251 usable hosts in AWS)'
+    ],
+    expectedOutput: `VPC: 10.0.0.0/16 (65,536 IPs)
+├── public-az1: 10.0.0.0/24 (us-east-1a)
+├── public-az2: 10.0.1.0/24 (us-east-1b)
+├── private-az1: 10.0.2.0/24 (us-east-1a)
+├── private-az2: 10.0.3.0/24 (us-east-1b)
+├── database-az1: 10.0.4.0/24 (us-east-1a)
+└── database-az2: 10.0.5.0/24 (us-east-1b)`,
+    applyData: { 
+      type: 'pattern', 
+      pattern: '3-tier-2az',
+      vpcCidr: '10.0.0.0/16',
+      vpcName: 'production-vpc',
+      provider: 'aws'
+    }
+  },
+  {
+    id: 'microservices',
+    title: 'Kubernetes Cluster Subnet',
+    category: 'Container',
+    icon: '⚓',
+    iconBg: 'rgba(50, 108, 229, 0.15)',
+    iconColor: '#326ce5',
+    description: 'Plan large /20 subnets for Kubernetes clusters where each pod needs an IP address.',
+    steps: [
+      'Set VPC CIDR: 172.16.0.0/16',
+      'Add subnet: eks-nodes with /20',
+      'This gives 4,091 usable IPs for pod networking',
+      'Add smaller /24 for management/bastion'
+    ],
+    expectedOutput: `VPC: 172.16.0.0/16
+├── eks-nodes: 172.16.0.0/20 (4,091 usable)
+├── eks-nodes-az2: 172.16.16.0/20 (4,091 usable)
+└── bastion: 172.16.32.0/24 (251 usable)`,
+    applyData: {
+      type: 'custom',
+      vpcCidr: '172.16.0.0/16',
+      vpcName: 'eks-vpc',
+      provider: 'aws',
+      subnets: [
+        { name: 'eks-nodes-az1', cidr: '172.16.0.0/20', tier: 'private', az: 'us-east-1a' },
+        { name: 'eks-nodes-az2', cidr: '172.16.16.0/20', tier: 'private', az: 'us-east-1b' },
+        { name: 'bastion', cidr: '172.16.32.0/24', tier: 'public', az: 'us-east-1a' }
+      ]
+    }
+  },
+  {
+    id: 'hybrid-cloud',
+    title: 'Hybrid Cloud Setup',
+    category: 'Enterprise',
+    icon: '🔗',
+    iconBg: 'rgba(168, 85, 247, 0.15)',
+    iconColor: '#a855f7',
+    description: 'Design VPC for hybrid connectivity with on-premises, avoiding IP conflicts.',
+    steps: [
+      'Use non-overlapping CIDR: 10.100.0.0/16 (avoid 10.0.x.x if on-prem uses it)',
+      'Reserve /20 for VPN/Direct Connect endpoints',
+      'Plan /22 subnets for workloads',
+      'Leave gaps for future growth'
+    ],
+    expectedOutput: `VPC: 10.100.0.0/16
+├── vpn-endpoints: 10.100.0.0/24
+├── workload-az1: 10.100.4.0/22 (1,019 hosts)
+├── workload-az2: 10.100.8.0/22 (1,019 hosts)
+└── (Reserved: 10.100.12.0/22 - 10.100.255.0)`,
+    applyData: {
+      type: 'custom',
+      vpcCidr: '10.100.0.0/16',
+      vpcName: 'hybrid-vpc',
+      provider: 'aws',
+      subnets: [
+        { name: 'vpn-endpoints', cidr: '10.100.0.0/24', tier: 'public', az: 'us-east-1a' },
+        { name: 'workload-az1', cidr: '10.100.4.0/22', tier: 'private', az: 'us-east-1a' },
+        { name: 'workload-az2', cidr: '10.100.8.0/22', tier: 'private', az: 'us-east-1b' }
+      ]
+    }
+  },
+  {
+    id: 'dev-test',
+    title: 'Development Environment',
+    category: 'Dev/Test',
+    icon: '🧪',
+    iconBg: 'rgba(34, 211, 238, 0.15)',
+    iconColor: '#22d3ee',
+    description: 'Smaller, cost-effective VPC for development and testing environments.',
+    steps: [
+      'Use smaller VPC: 10.10.0.0/20 (4,096 IPs)',
+      'Single AZ is often sufficient for dev',
+      'Add /26 subnets (59 hosts each)',
+      'Quick to provision, easy to tear down'
+    ],
+    expectedOutput: `VPC: 10.10.0.0/20
+├── dev-app: 10.10.0.0/26 (59 usable)
+├── dev-db: 10.10.0.64/26 (59 usable)
+└── dev-tools: 10.10.0.128/26 (59 usable)`,
+    applyData: {
+      type: 'custom',
+      vpcCidr: '10.10.0.0/20',
+      vpcName: 'dev-vpc',
+      provider: 'aws',
+      subnets: [
+        { name: 'dev-app', cidr: '10.10.0.0/26', tier: 'private', az: 'us-east-1a' },
+        { name: 'dev-db', cidr: '10.10.0.64/26', tier: 'database', az: 'us-east-1a' },
+        { name: 'dev-tools', cidr: '10.10.0.128/26', tier: 'private', az: 'us-east-1a' }
+      ]
+    }
+  },
+  {
+    id: 'multi-region',
+    title: 'Multi-Region Planning',
+    category: 'Global',
+    icon: '🌍',
+    iconBg: 'rgba(34, 197, 94, 0.15)',
+    iconColor: '#22c55e',
+    description: 'Plan non-overlapping CIDRs across multiple regions for VPC peering.',
+    steps: [
+      'Assign unique /16 per region',
+      'US: 10.0.0.0/16, EU: 10.1.0.0/16, APAC: 10.2.0.0/16',
+      'Enables VPC peering without CIDR conflicts',
+      'Document in IP Address Management (IPAM)'
+    ],
+    expectedOutput: `us-east-1: 10.0.0.0/16 (65K IPs)
+eu-west-1: 10.1.0.0/16 (65K IPs)  
+ap-southeast-1: 10.2.0.0/16 (65K IPs)
+└── No overlaps = Easy peering!`,
+    applyData: { 
+      type: 'pattern', 
+      pattern: '3-tier-2az',
+      vpcCidr: '10.0.0.0/16',
+      vpcName: 'us-east-vpc',
+      provider: 'aws',
+      region: 'us-east-1'
+    }
+  }
+];
 
 /**
  * ExportDropdown - Dropdown menu for export options
@@ -289,6 +440,24 @@ const VPCPlanner = () => {
     
     setSubnets(newSubnets.map((s, i) => ({ ...s, id: Date.now() + i })));
   };
+
+  // Handle applying an example
+  const handleApplyExample = (data) => {
+    if (data.vpcCidr) setVpcCidr(data.vpcCidr);
+    if (data.vpcName) setVpcName(data.vpcName);
+    if (data.provider) setProvider(data.provider);
+    if (data.region) setRegion(data.region);
+    
+    if (data.type === 'pattern') {
+      // Use the quick add pattern after setting VPC config
+      setTimeout(() => {
+        handleQuickAdd(data.pattern);
+      }, 100);
+    } else if (data.type === 'custom' && data.subnets) {
+      // Apply custom subnets
+      setSubnets(data.subnets.map((s, i) => ({ ...s, id: Date.now() + i })));
+    }
+  };
   
   // Export
   const handleExport = (format) => {
@@ -305,6 +474,12 @@ const VPCPlanner = () => {
   
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Usage Examples */}
+      <UsageExamples 
+        examples={vpcExamples} 
+        onApplyExample={handleApplyExample}
+      />
+
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 style={{ fontSize: '1.875rem', fontWeight: 700, color: 'white', margin: 0 }}>
@@ -316,7 +491,7 @@ const VPCPlanner = () => {
       </motion.div>
       
       {/* VPC Configuration */}
-      <GlassCard variant="glow" padding="lg">
+      <GlassCard variant="glow" padding="lg" data-tour="vpc-info">
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
@@ -479,7 +654,7 @@ const VPCPlanner = () => {
       )}
       
       {/* Actions Bar */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }} data-tour="add-subnet">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <Button variant="primary" onClick={() => setShowAddModal(true)} disabled={!vpcData}>
             + Add Subnet
